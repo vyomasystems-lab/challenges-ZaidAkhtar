@@ -24,3 +24,35 @@ async def test_seq_bug1(dut):
     await FallingEdge(dut.clk)
 
     cocotb.log.info('#### CTB: Develop your test here! ######')
+    sequence = [1,0,1,1]
+    seqBit = [0,0,0,1,0,1,1,0,0,0,0,0]
+    result = [0,0,0,0,0,0,0,0,0,0,0,0]
+    
+    for i in range(3):
+        seqBit[i] = random.randint(0, 1)
+    
+    for i in range(7,12):
+        seqBit[i] = random.randint(0, 1)
+        
+    cocotb.log.info('random sequence bits = ',seqBit)
+
+    for i in range(len(seqBit)):
+        dut.inp_bit.value = seqBit[i]
+
+    index = []
+    for i in range(len(seqBit)):
+        if seqBit[i:i+len(sequence)] == sequence:
+           index.append(i+len(sequence))
+           result[i+len(sequence)] = 1
+
+    cocotb.log.info('result : ',result)
+
+    for i in range(len(seqBit)):
+        
+        dut.inp_bit.value = seqBit[i]
+        await RisingEdge(dut.clk)
+        try:
+            assert dut.seq_seen.value == result[i]
+        except AssertionError as e:
+            print("RESULT MISMATCH FOR INDEX = {A}, EXPECTING :{B}, GOT: {C}".format(A=i, B=seqBit[i+1], C=int(dut.seq_seen.value)))
+        
