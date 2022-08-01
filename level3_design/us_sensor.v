@@ -53,7 +53,7 @@ always @(posedge clk) begin
 	end	
 end
 	
-	always
+	always @(t_3c)
 		distance=(t_3c*34)/200000;
 			
 always @(posedge clk) begin
